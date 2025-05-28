@@ -1,5 +1,15 @@
-# Vue 3 + Vite
+# skorKeeper
+- A simple score keeper app for card games and any others that apply.
+- This has been created as a PWA (progressive web app) that can be added to phone home screens.
+- Once setup is done, there is no need to be online for the app to work.
+- The service worker feature will cache all logic required for the app to work locally.
+- This app does not use any external apis and all scripts work purely within the system.
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Setup
+- Navigate to https://skorkeeper.netlify.app/
+- Use the share button and find an option allowing to to add to mobile home screen
+- Enjoy :)
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Hidden Features
+- You can fetch updates to the app by pressing my name (munziiiir) to the right of the title
+- To remove players in the middle of a game, rename the player to "rename@" and confirm the prompt
