@@ -52,6 +52,7 @@
       <button @click="addRound">+ Round</button>
       <button @click="addPlayer">+ Player</button>
       <button @click="resetScores">Reset Scores</button>
+      <button v-if="canUndo" @click="undoReset">Undo Reset</button>
       <button @click="restartGame">New Game</button>
     </div>
   </div>
@@ -72,6 +73,10 @@ const players = reactive([])
 const rounds = ref([])
 const toast = ref('')
 let toastTimer
+
+const prevPlayers = ref(null)
+const prevRounds = ref(null)
+const canUndo = ref(false)
 
 const { updateServiceWorker } = useRegisterSW()
 
@@ -107,7 +112,7 @@ const startGame = () => {
 watch(players, (newPlayers) => {
   newPlayers.forEach((player, i) => {
     if (player.name?.trim() === 'remove@') {
-      // Force keyboard to close
+      // force close keyboard
       document.activeElement?.blur()
       setTimeout(() => {
         const confirmed = confirm('Are you sure you want to delete this player?')
@@ -159,12 +164,82 @@ const totalScore = (player) => {
   return player.scores.reduce((sum, score) => sum + (score || 0), 0)
 }
 
+function isDefaultState() {
+  // check if all player names are default and all scores are zero
+  return players.every((p, i) =>
+    p.name === `player${i + 1}` &&
+    p.scores.length === 1 &&
+    p.scores[0] === 0
+  ) && rounds.value.length === 1 && rounds.value[0] === 0
+}
+
+function isDefaultScores() {
+  // only check if all scores are zero and rounds are at initial state
+  return players.every(
+    (p) => p.scores.length === 1 && p.scores[0] === 0
+  ) && rounds.value.length === 1 && rounds.value[0] === 0
+}
+
 const resetScores = () => {
+  // Only allow undo if not already at default state
+  if (!isDefaultScores()) {
+    prevPlayers.value = players.map(p => ({
+      name: p.name,
+      scores: [...p.scores]
+    }))
+    prevRounds.value = [...rounds.value]
+    canUndo.value = true
+    showToast("Scores reset. You can undo this action.", 3000)
+  } else {
+    const toasts = [
+      "moron",
+      "already squeaky clean!",
+      "nothing to reset here",
+      "scores are already zero",
+      "relax, it's already empty",
+      "no need to reset the void",
+      "you can't reset nothing",
+      "all clear, captain!",
+      "mission already accomplished",
+      "the slate is clean",
+      "resetting the reset...",
+      "you good?",
+      "umm...",
+      "dumbass",
+      "excuse me?",
+      "no points, no problems",
+      "try resetting your brain instead",
+      "resetting... oh wait, nevermind",
+      "there's nothing left to reset",
+      "are you just clicking for fun?",
+      "maybe try playing first?"
+    ]
+    const randomToast = toasts[Math.floor(Math.random() * toasts.length)]
+    showToast(randomToast, 1000)
+  }
   rounds.value = [0]
   players.forEach(player => {player.scores = [0]})
 }
 
+const undoReset = () => {
+  if (canUndo.value && prevPlayers.value && prevRounds.value) {
+    // restore previous state
+    rounds.value = [...prevRounds.value]
+    players.length = 0
+    prevPlayers.value.forEach(p =>
+      players.push({ name: p.name, scores: [...p.scores] })
+    )
+    canUndo.value = false
+    showToast('Undo successful!')
+  }
+}
+
 const restartGame = () => {
+  if (gameStarted.value) {
+    const confirmed = confirm('Are you sure you want to start a new game? All progress will be lost.')
+    if (!confirmed) return
+  }
+  canUndo.value = false
   gameStarted.value = false
 }
 
